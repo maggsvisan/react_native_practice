@@ -15,10 +15,28 @@ import {
 
 import ComponenteText from './componenteTexto';
 
+export class Loading extends Component{
+
+  render(){
+    return(
+      <Text> Loading... </Text>
+    )
+  }
+}
+
 export class ChildComponent extends Component{
   render(){
+    if (this.props.result){
+      var res= this.props.result.map((item, i)=>{
+        return(
+          <Text key={i}> {item.title} </Text>
+        )
+      })
+    }
+
     return (
       <View>
+        {this.props.result ? res: <Loading/>}
         <View style={this.props.status ? styles.on: styles.off}/>
       </View>
     )
@@ -35,7 +53,20 @@ const instructions = Platform.select({
 export default class App extends Component<{}> {
   constructor(){
       super()
-      this.state = {status: false}
+      this.state = {
+        status: false,
+        data: null
+      }
+  }
+
+  componentDidMount(){
+      fetch('https://facebook.github.io/react-native/movies.json')
+        .then((response)=> response.json())
+        .then((responseJson)=>{
+          this.setState({
+            data: responseJson.movies
+          })
+        })
   }
 
   clicked(){
@@ -49,7 +80,7 @@ export default class App extends Component<{}> {
 
     return (
       <View style={styles.container}>
-      <ChildComponent status={this.state.status}/>
+      <ChildComponent status={this.state.status} result={this.state.data}/>
       <Button
         onPress={this.clicked.bind(this)}
         title='Click here'
